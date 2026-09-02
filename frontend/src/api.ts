@@ -1,4 +1,4 @@
-import { CurrentStatus, ForecastResponse, SimulationParams, SimulationResponse, HourExplanation } from './types';
+import { CurrentStatus, ForecastResponse, SimulationParams, SimulationResponse, HourExplanation, MLMetricsResponse } from './types';
 
 const API_BASE = import.meta.env.VITE_API_URL 
   ? `${import.meta.env.VITE_API_URL}/api` 
@@ -29,5 +29,11 @@ export async function runPhysicsSimulation(params: SimulationParams): Promise<Si
 export async function fetchHourExplanation(hour: number): Promise<HourExplanation> {
   const res = await fetch(`${API_BASE}/explain/${hour}`);
   if (!res.ok) throw new Error(`Failed to fetch explanation for hour ${hour}`);
+  return res.json();
+}
+
+export async function fetchMLMetrics(): Promise<MLMetricsResponse> {
+  const res = await fetch(`${API_BASE}/ml/metrics`);
+  if (!res.ok) throw new Error('Failed to fetch ML model diagnostics');
   return res.json();
 }

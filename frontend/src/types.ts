@@ -131,3 +131,24 @@ export interface ScenarioPreset {
   badgeColor: string;
   params: SimulationParams;
 }
+
+export interface MLHorizonMetric {
+  mae: number;
+  rmse: number;
+  r2: number;
+  mape: number;
+}
+
+export interface MLMetricsResponse {
+  model_level: string;
+  status: string;
+  architecture: string;
+  parameters_count: number;
+  input_features_count: number;
+  forecast_horizon_hours: number;
+  trained_epochs: number;
+  physics_compliance_rate: number;
+  target_baseline_means: Record<string, number>;
+  evaluation_metrics: Record<string, Record<string, MLHorizonMetric>>;
+  training_loss_history: number[];
+}

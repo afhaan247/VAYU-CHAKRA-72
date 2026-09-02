@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, 
-  MapPin, 
   Clock, 
   FileText, 
   RefreshCw, 
@@ -35,7 +34,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenGazette,
   isDarkMode,
   onToggleTheme,
-  lastUpdated,
   activePage,
   onOpenMobileSidebar,
 }) => {
@@ -61,10 +59,14 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const pageTitles: Record<AppPage, { title: string; subtitle: string }> = {
+  const pageHeaders: Record<AppPage, { title: string; subtitle: string }> = {
     overview: {
-      title: 'Overview & Live CAAQMS Feed',
-      subtitle: 'Real-time telemetry, 72h snapshot & key atmospheric metrics',
+      title: 'Overview',
+      subtitle: 'Real-time telemetry & system status',
+    },
+    map3d: {
+      title: '3D Air Quality Map',
+      subtitle: 'Real-time pollution distribution in 3D atmosphere',
     },
     forecast: {
       title: '72-Hour Atmospheric Forecaster',
@@ -84,128 +86,120 @@ export const Header: React.FC<HeaderProps> = ({
     },
   };
 
-  const currentPage = pageTitles[activePage] || pageTitles.overview;
+  const currentHeader = pageHeaders[activePage] || pageHeaders.overview;
 
   return (
-    <header className="border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0B1528]/95 backdrop-blur-md sticky top-0 z-30 shadow-xs transition-colors">
+    <header className="px-6 py-4 flex items-center justify-between gap-4 flex-wrap bg-transparent">
       
-      {/* Sovereign National Color Accent Bar */}
-      <div className="h-1 w-full bg-gradient-to-r from-[#FF9933] via-[#FFFFFF] to-[#138808] border-b border-slate-200/50 dark:border-slate-800/50"></div>
+      {/* Left: Page Title & Subtitle */}
+      <div className="flex items-center space-x-3 min-w-0">
+        <button
+          onClick={onOpenMobileSidebar}
+          className="md:hidden p-2 rounded-xl border border-[#DCD6CB] bg-[#FCFAF7] text-[#1C201C] hover:bg-[#F3EFE6] transition shadow-xs flex-shrink-0"
+          title="Open Navigation Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
 
-      <div className="px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1C201C] tracking-tight">
+            {currentHeader.title}
+          </h1>
+          <p className="text-xs text-[#666D67] font-medium tracking-tight mt-0.5">
+            {currentHeader.subtitle}
+          </p>
+        </div>
+      </div>
+
+      {/* Right Toolbar: Station Dropdown, IST Clock, Gazette Button & Quick Actions */}
+      <div className="flex items-center space-x-2.5 text-xs flex-shrink-0">
         
-        {/* Left: Mobile Menu Hamburger & Page Title */}
-        <div className="flex items-center space-x-3 min-w-0">
+        {/* Station Selector Dropdown Pill */}
+        <div className="relative">
           <button
-            onClick={onOpenMobileSidebar}
-            className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition shadow-xs flex-shrink-0"
-            title="Open Navigation Menu"
+            onClick={() => setIsStationDropdownOpen(!isStationDropdownOpen)}
+            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#FCFAF7] hover:bg-[#F5F2EC] border border-[#DCD6CB] font-semibold text-[#1C201C] transition text-xs shadow-xs"
           >
-            <Menu className="w-5 h-5" />
+            <span className="w-2 h-2 rounded-full bg-[#10B981] flex-shrink-0"></span>
+            <span className="truncate max-w-[160px] sm:max-w-[220px]">{selectedStation.name}</span>
+            <ChevronDown className="w-3.5 h-3.5 text-[#666D67] ml-0.5 flex-shrink-0" />
           </button>
 
-          <div className="min-w-0">
-            <h2 className="text-xs sm:text-sm font-extrabold text-[#0F2A4A] dark:text-sky-300 tracking-tight truncate">
-              {currentPage.title}
-            </h2>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate hidden sm:block">
-              {currentPage.subtitle}
-            </p>
-          </div>
-        </div>
-
-        {/* Right Toolbar: Station Dropdown, IST Clock & Quick Actions */}
-        <div className="flex items-center space-x-2 text-xs font-mono flex-shrink-0">
-          
-          {/* Station Selector Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsStationDropdownOpen(!isStationDropdownOpen)}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 font-bold text-slate-800 dark:text-slate-200 transition text-xs shadow-2xs max-w-[150px] sm:max-w-[240px]"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-              <span className="truncate text-left">{selectedStation.name}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500 ml-0.5 flex-shrink-0" />
-            </button>
-
-            {/* Dropdown Menu */}
-            {isStationDropdownOpen && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40 bg-black/40 sm:hidden"
-                  onClick={() => setIsStationDropdownOpen(false)}
-                />
-                
-                <div className="fixed sm:absolute inset-x-3 bottom-3 sm:inset-x-auto sm:bottom-auto sm:top-full sm:right-0 sm:mt-1 sm:w-96 bg-white dark:bg-slate-800 rounded-2xl sm:rounded-xl shadow-2xl sm:shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 max-h-[75vh] sm:max-h-72 overflow-y-auto">
-                  <div className="px-4 py-2 text-[11px] sm:text-[10px] font-bold font-mono uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                    <span>Delhi-NCR CAAQMS Network</span>
-                    <span className="sm:hidden text-xs text-blue-600" onClick={() => setIsStationDropdownOpen(false)}>Done</span>
-                  </div>
-                  {DELHI_NCR_STATIONS.map((station) => (
-                    <button
-                      key={station.id}
-                      onClick={() => {
-                        onSelectStation(station);
-                        setIsStationDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 sm:py-2 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/60 active:bg-blue-50 dark:active:bg-blue-900/40 transition border-b sm:border-b-0 border-slate-100 dark:border-slate-800/60 ${
-                        selectedStation.id === station.id ? 'bg-blue-50/80 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-bold' : 'text-slate-700 dark:text-slate-200'
-                      }`}
-                    >
-                      <div className="min-w-0 pr-2">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="truncate">{station.name}</span>
-                        </div>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal truncate mt-0.5">
-                          {station.state} • {station.agency} • {station.type}
-                        </p>
-                      </div>
-                      {selectedStation.id === station.id && (
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-cyan-400 flex-shrink-0" />
-                      )}
-                    </button>
-                  ))}
+          {/* Dropdown Menu */}
+          {isStationDropdownOpen && (
+            <>
+              <div 
+                className="fixed inset-0 z-40 bg-black/30 sm:hidden"
+                onClick={() => setIsStationDropdownOpen(false)}
+              />
+              
+              <div className="fixed sm:absolute inset-x-3 bottom-3 sm:inset-x-auto sm:bottom-auto sm:top-full sm:right-0 sm:mt-1.5 sm:w-96 bg-[#FCFAF7] rounded-2xl shadow-xl border border-[#DCD6CB] py-2 z-50 max-h-[75vh] sm:max-h-80 overflow-y-auto">
+                <div className="px-4 py-2 text-[11px] font-mono font-bold uppercase text-[#666D67] border-b border-[#EBE6DC] flex items-center justify-between">
+                  <span>Delhi-NCR CAAQMS Network</span>
+                  <span className="sm:hidden text-xs text-[#2E7D47] font-bold cursor-pointer" onClick={() => setIsStationDropdownOpen(false)}>Close</span>
                 </div>
-              </>
-            )}
-          </div>
-
-          {/* Live Clock (tablet/desktop) */}
-          <div className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px]">
-            <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
-            <span>{istTime || 'IST'}</span>
-          </div>
-
-          {/* Gazette Modal Button (desktop) */}
-          <button
-            onClick={onOpenGazette}
-            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#0F2A4A] hover:bg-[#163b65] text-white font-medium text-xs shadow-xs transition"
-          >
-            <FileText className="w-3.5 h-3.5 text-amber-300" />
-            <span>Gazette Bulletin</span>
-          </button>
-
-          {/* Refresh Button */}
-          <button
-            onClick={onRefresh}
-            disabled={isLoading}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium text-xs transition disabled:opacity-50 flex items-center space-x-1"
-            title="Refresh Telemetry"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-blue-600' : 'text-slate-500'}`} />
-            <span className="hidden xl:inline">Refresh</span>
-          </button>
-
-          {/* Theme Toggle Button */}
-          <button
-            onClick={onToggleTheme}
-            title="Toggle Light/Dark Theme"
-            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-          >
-            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-          </button>
-
+                {DELHI_NCR_STATIONS.map((station) => (
+                  <button
+                    key={station.id}
+                    onClick={() => {
+                      onSelectStation(station);
+                      setIsStationDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-xs flex items-center justify-between hover:bg-[#F3EFE6] transition border-b border-[#F0EBE0] last:border-b-0 ${
+                      selectedStation.id === station.id ? 'bg-[#EAE4D7] text-[#1C201C] font-bold' : 'text-[#2C322D]'
+                    }`}
+                  >
+                    <div className="min-w-0 pr-2">
+                      <div className="flex items-center space-x-1.5">
+                        <span className="truncate font-semibold">{station.name}</span>
+                      </div>
+                      <p className="text-[10px] text-[#666D67] font-normal truncate mt-0.5">
+                        {station.state} • {station.agency} • {station.type}
+                      </p>
+                    </div>
+                    {selectedStation.id === station.id && (
+                      <CheckCircle2 className="w-4 h-4 text-[#2E7D47] flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
+
+        {/* Live Clock Pill */}
+        <div className="hidden md:flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#FCFAF7] border border-[#DCD6CB] text-[#1C201C] text-xs font-mono font-medium shadow-xs">
+          <Clock className="w-3.5 h-3.5 text-[#666D67]" />
+          <span>{istTime || '31 Aug, 21:04:41 IST'}</span>
+        </div>
+
+        {/* Gazette Bulletin Button */}
+        <button
+          onClick={onOpenGazette}
+          className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-[#233027] hover:bg-[#2C3D31] text-[#F3EFE6] font-semibold text-xs border border-[#344438] shadow-xs transition"
+        >
+          <FileText className="w-3.5 h-3.5 text-[#B8C7BA]" />
+          <span>Gazette Bulletin</span>
+        </button>
+
+        {/* Refresh Circular Button */}
+        <button
+          onClick={onRefresh}
+          disabled={isLoading}
+          className="p-2 rounded-xl bg-[#FCFAF7] hover:bg-[#F3EFE6] border border-[#DCD6CB] text-[#1C201C] transition shadow-xs disabled:opacity-50"
+          title="Refresh Data"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#2E7D47]' : 'text-[#444C45]'}`} />
+        </button>
+
+        {/* Theme Toggle Circular Button */}
+        <button
+          onClick={onToggleTheme}
+          title="Toggle Theme"
+          className="p-2 rounded-xl bg-[#FCFAF7] hover:bg-[#F3EFE6] border border-[#DCD6CB] text-[#1C201C] transition shadow-xs"
+        >
+          {isDarkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-[#444C45]" />}
+        </button>
 
       </div>
     </header>

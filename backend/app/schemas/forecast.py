@@ -69,3 +69,22 @@ class SimulationResponse(BaseModel):
     aqi_delta: int
     impact_summary: str
     forecast: List[ForecastHourItem]
+
+class MLHorizonMetric(BaseModel):
+    mae: float
+    rmse: float
+    r2: float
+    mape: float
+
+class MLMetricsResponse(BaseModel):
+    model_level: str
+    status: str
+    architecture: str
+    parameters_count: int
+    input_features_count: int
+    forecast_horizon_hours: int
+    trained_epochs: int
+    physics_compliance_rate: float
+    target_baseline_means: Dict[str, float]
+    evaluation_metrics: Dict[str, Dict[str, MLHorizonMetric]]
+    training_loss_history: List[float]

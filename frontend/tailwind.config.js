@@ -45,6 +45,25 @@ export default {
           blue: "#1D4ED8",
           indigo: "#4F46E5",
           emerald: "#059669"
+        },
+        // AIRNEXUS 26082 Warm Sand & Forest Design System
+        airnexus: {
+          sand: "#EFECE6",
+          sandLight: "#F5F2EC",
+          sandDark: "#E5E1D8",
+          sidebar: "#1B241E",
+          sidebarLight: "#243028",
+          sidebarActive: "#F3EFE6",
+          card: "#FCFAF7",
+          cardWhite: "#FFFFFF",
+          border: "#E4DFD5",
+          borderDark: "#D8D2C6",
+          text: "#1C201C",
+          textMuted: "#666D67",
+          textLight: "#9BA39C",
+          pillGreen: "#2E7D47",
+          pillBurgundy: "#7A1B22",
+          badgeDark: "#27332A"
         }
       },
       fontFamily: {
